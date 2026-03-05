@@ -1,0 +1,53 @@
+﻿<Window x:Class="HeartIt.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HeartIt"
+        mc:Ignorable="d"
+        Title="Heart It"
+        Width="330" Height="70"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Border Background="#FF2D2D30" CornerRadius="12" Padding="6,4"
+            BorderBrush="#FF3F3F46" BorderThickness="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Status indicator -->
+            <Ellipse Grid.Column="0" Width="8" Height="8" Margin="4,0,6,0"
+                     VerticalAlignment="Center" x:Name="StatusIndicator">
+                <Ellipse.ToolTip>
+                    <TextBlock x:Name="StatusToolTip" Text="Checking..."/>
+                </Ellipse.ToolTip>
+            </Ellipse>
+
+            <!-- Reaction buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BtnLike" Content="👍" Click="OnReactionClick" Tag="Like"
+                        Style="{StaticResource ReactionButton}" ToolTip="Like (Ctrl+Alt+1)"/>
+                <Button x:Name="BtnHeart" Content="❤️" Click="OnReactionClick" Tag="Love"
+                        Style="{StaticResource ReactionButton}" ToolTip="Heart (Ctrl+Alt+2)"/>
+                <Button x:Name="BtnClap" Content="👏" Click="OnReactionClick" Tag="Applause"
+                        Style="{StaticResource ReactionButton}" ToolTip="Applause (Ctrl+Alt+3)"/>
+                <Button x:Name="BtnLaugh" Content="😂" Click="OnReactionClick" Tag="Laugh"
+                        Style="{StaticResource ReactionButton}" ToolTip="Laugh (Ctrl+Alt+4)"/>
+                <Button x:Name="BtnSurprised" Content="😮" Click="OnReactionClick" Tag="Surprised"
+                        Style="{StaticResource ReactionButton}" ToolTip="Surprised (Ctrl+Alt+5)"/>
+            </StackPanel>
+
+            <!-- Close button -->
+            <Button Grid.Column="2" Content="✕" Click="OnCloseClick"
+                    Style="{StaticResource CloseButton}"/>
+        </Grid>
+    </Border>
+</Window>
