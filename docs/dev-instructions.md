@@ -121,16 +121,16 @@ It uses the [`winapp` CLI](https://github.com/microsoft/WinAppCli) for certifica
 ### How It Works
 
 1. **Build job** — runs in parallel for x64 and ARM64:
-   - Installs .NET 10 SDK and MSBuild
+   - Installs .NET 10 SDK, MSBuild, and the `winapp` CLI
    - Derives version from the git tag (e.g. `v1.2.3` → `1.2.3.0`) or manual input
    - Patches `Package.appxmanifest` with the resolved version
-   - Creates a temporary self-signed certificate
+   - Generates a self-signed certificate via `winapp cert generate`
    - Builds the MSIX via MSBuild
    - Uploads the `.msix` as a workflow artifact
 
 2. **Bundle job** — runs after both builds complete:
    - Downloads the x64 and ARM64 `.msix` artifacts
-   - Uses `MakeAppx.exe` (from the Windows SDK) to bundle them into a single `.msixbundle`
+   - Uses `winapp tool MakeAppx` to bundle them into a single `.msixbundle`
    - Uploads the bundle as a workflow artifact
    - If triggered by a version tag, creates a GitHub Release with the bundle attached
 
