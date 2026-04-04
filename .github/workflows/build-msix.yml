@@ -37,7 +37,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Setup winapp CLI
-        uses: microsoft/setup-WinAppCli@v1
+        uses: microsoft/setup-WinAppCli@v0.1
 
       - name: Determine version
         id: version
@@ -106,7 +106,7 @@ jobs:
           path: packages
 
       - name: Setup winapp CLI
-        uses: microsoft/setup-WinAppCli@v1
+        uses: microsoft/setup-WinAppCli@v0.1
 
       - name: Create MSIX bundle
         shell: pwsh
