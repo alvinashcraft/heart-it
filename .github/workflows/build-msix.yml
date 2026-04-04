@@ -65,8 +65,8 @@ jobs:
         id: cert
         shell: pwsh
         run: |
-          winapp cert generate --subject "CN=HeartIt" --output HeartIt.Package/HeartIt_DevCert.pfx
-          Write-Output "CERT_PATH=HeartIt.Package/HeartIt_DevCert.pfx" >> $env:GITHUB_OUTPUT
+          winapp cert generate --publisher "CN=HeartIt" --output HeartIt.Package\HeartIt_DevCert.pfx --password HeartItBuild
+          Write-Output "CERT_PATH=HeartIt.Package\HeartIt_DevCert.pfx" >> $env:GITHUB_OUTPUT
 
       - name: Build MSIX package
         run: >
@@ -76,7 +76,7 @@ jobs:
           /p:UapAppxPackageBuildMode=SideloadOnly
           /p:AppxPackageSigningEnabled=true
           /p:PackageCertificateKeyFile=HeartIt_DevCert.pfx
-          /p:PackageCertificatePassword=
+          /p:PackageCertificatePassword=HeartItBuild
           /p:AppxPackageDir=${{ github.workspace }}\AppPackages\
           /p:GenerateAppxPackageOnBuild=true
           /p:AppxBundle=Never

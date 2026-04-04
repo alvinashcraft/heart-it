@@ -71,7 +71,7 @@ Key MSBuild properties:
 Create a self-signed certificate for local testing and sideloading using the `winapp` CLI:
 
 ```powershell
-winapp cert generate --subject "CN=HeartIt" --output HeartIt_DevCert.pfx
+winapp cert generate --publisher "CN=HeartIt" --output HeartIt_DevCert.pfx
 ```
 
 Or manually via PowerShell:
