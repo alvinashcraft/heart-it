@@ -65,8 +65,8 @@ jobs:
         id: cert
         shell: pwsh
         run: |
-          winapp cert generate --publisher "CN=HeartIt" --output HeartIt.Package\HeartIt_DevCert.pfx --password HeartItBuild
-          Write-Output "CERT_PATH=HeartIt.Package\HeartIt_DevCert.pfx" >> $env:GITHUB_OUTPUT
+          winapp cert generate --publisher "CN=HeartIt" --output HeartIt_DevCert.pfx --password HeartItBuild
+          Move-Item HeartIt_DevCert.pfx HeartIt.Package\HeartIt_DevCert.pfx
 
       - name: Build MSIX package
         run: >
