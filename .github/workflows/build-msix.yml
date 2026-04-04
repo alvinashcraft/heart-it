@@ -1,0 +1,134 @@
+name: Build MSIX
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 1.0.1.0)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        platform: [x64, ARM64]
+
+    env:
+      PACKAGE_PROJECT: HeartIt.Package/HeartIt.Package.wapproj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup winapp CLI
+        uses: microsoft/setup-WinAppCli@v1
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          if ('${{ github.event.inputs.version }}') {
+            $version = '${{ github.event.inputs.version }}'
+          } elseif ('${{ github.ref_type }}' -eq 'tag') {
+            $version = '${{ github.ref_name }}'.TrimStart('v')
+            if ($version.Split('.').Length -eq 3) { $version += '.0' }
+          } else {
+            $version = '1.0.0.0'
+          }
+          Write-Output "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Update manifest version
+        shell: pwsh
+        run: |
+          $manifest = 'HeartIt.Package/Package.appxmanifest'
+          $content = Get-Content $manifest -Raw
+          $content = $content -replace 'Version="[^"]*"', 'Version="${{ steps.version.outputs.VERSION }}"'
+          Set-Content $manifest $content
+
+      - name: Generate development certificate
+        id: cert
+        shell: pwsh
+        run: |
+          winapp cert generate --subject "CN=HeartIt" --output HeartIt.Package/HeartIt_DevCert.pfx
+          Write-Output "CERT_PATH=HeartIt.Package/HeartIt_DevCert.pfx" >> $env:GITHUB_OUTPUT
+
+      - name: Build MSIX package
+        run: >
+          msbuild ${{ env.PACKAGE_PROJECT }}
+          /p:Configuration=Release
+          /p:Platform=${{ matrix.platform }}
+          /p:UapAppxPackageBuildMode=SideloadOnly
+          /p:AppxPackageSigningEnabled=true
+          /p:PackageCertificateKeyFile=HeartIt_DevCert.pfx
+          /p:PackageCertificatePassword=
+          /p:AppxPackageDir=${{ github.workspace }}\AppPackages\
+          /p:GenerateAppxPackageOnBuild=true
+          /p:AppxBundle=Never
+          /restore
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeartIt-${{ matrix.platform }}
+          path: ${{ github.workspace }}\AppPackages\**\*.msix
+
+  bundle:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Download x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: HeartIt-x64
+          path: packages
+
+      - name: Download ARM64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: HeartIt-ARM64
+          path: packages
+
+      - name: Setup winapp CLI
+        uses: microsoft/setup-WinAppCli@v1
+
+      - name: Create MSIX bundle
+        shell: pwsh
+        run: |
+          $msixFiles = Get-ChildItem -Path packages -Filter *.msix -Recurse
+          Write-Output "Found MSIX files:"
+          $msixFiles | ForEach-Object { Write-Output "  $($_.FullName)" }
+
+          New-Item -ItemType Directory -Path "bundle_input" -Force | Out-Null
+          $msixFiles | ForEach-Object { Copy-Item $_.FullName -Destination "bundle_input\" }
+
+          winapp tool MakeAppx bundle /d "bundle_input" /p "HeartIt.msixbundle"
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeartIt-Bundle
+          path: HeartIt.msixbundle
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: HeartIt.msixbundle
+          generate_release_notes: true

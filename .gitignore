@@ -311,3 +311,14 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Code signing certificates
+*.pfx
+*.cer
+
+# MSIX packaging artifacts
+*.msixbundle
+*.appxsym
+
+# WAP project cache
+*.assets.cache

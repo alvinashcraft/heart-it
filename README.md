@@ -17,10 +17,42 @@ A Windows desktop application that enables quick reactions in Microsoft Teams us
 
 ## Installation
 
-1. Clone the repository
-2. Open the solution in Visual Studio 2022 or later
-3. Build the project
-4. Run `HeartIt.exe`
+### From winget (coming soon)
+
+```bash
+winget install HeartIt
+```
+
+### From GitHub Releases
+
+1. Download the latest `.msixbundle` from [Releases](../../releases)
+2. Double-click to install (you may need to install the signing certificate first for sideloaded packages)
+
+### Building from Source
+
+```bash
+git clone https://github.com/yourusername/heart-it.git
+cd heart-it
+dotnet build
+dotnet run --project HeartIt/HeartIt.csproj
+```
+
+### Building the MSIX Package
+
+The packaging project uses the Windows Application Packaging Project format. To build the MSIX locally:
+
+```powershell
+msbuild HeartIt.Package/HeartIt.Package.wapproj /p:Configuration=Release /p:Platform=x64 /restore
+```
+
+To create a release, push a version tag:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This triggers the GitHub Actions workflow that builds MSIX packages for x64 and ARM64 and creates an `.msixbundle`.
 
 ## Usage
 
@@ -43,15 +75,6 @@ HeartIt uses Windows UI Automation to interact with the Microsoft Teams applicat
 3. Triggers the reaction flyout
 4. Selects the appropriate reaction
 5. Returns focus to your previous window
-
-## Building from Source
-
-```bash
-git clone https://github.com/yourusername/heart-it.git
-cd heart-it
-dotnet build
-dotnet run --project HeartIt/HeartIt.csproj
-```
 
 ## Technology Stack
 
