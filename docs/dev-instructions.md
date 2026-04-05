@@ -99,12 +99,76 @@ To install the certificate for sideloading, import the `.cer` (public key) into 
 
 ### Production Certificate
 
-For winget distribution, you need a code signing certificate from a trusted CA (e.g. SSL.com, SignPath, DigiCert).
-Once obtained, update the CI workflow to use it via GitHub secrets:
+For winget distribution, you need a code signing certificate from a trusted CA.
+Since 2023, all OV/EV code signing certificates require hardware-backed private key storage (HSM).
+This means you can't just download a `.pfx` and use it in CI — you need a cloud HSM solution.
 
-1. Base64-encode the `.pfx` and store as a repository secret (`SIGNING_CERTIFICATE`)
-2. Store the password as a secret (`SIGNING_CERTIFICATE_PASSWORD`)
-3. Update `build-msix.yml` to decode the secret and pass it to MSBuild
+#### Recommended Providers
+
+| Provider | OV (~$/yr) | Notes |
+|----------|-----------|-------|
+| SSL.com | ~$129 | Budget-friendly, fast validation |
+| FastSSL | ~$129 | Cheapest option |
+| Sectigo/Comodo | ~$166–226 | Most widely used, offers KeyStorage cloud HSM |
+| DigiCert | ~$434+ | Premium, offers KeyLocker cloud HSM |
+
+- **OV (Organization Validation)** is sufficient for winget distribution, but new apps
+  may trigger SmartScreen "Windows protected your PC" warnings until the app builds
+  download reputation over time
+- **EV (Extended Validation)** costs more but establishes immediate SmartScreen trust —
+  users won't see the "Windows protected your PC" warning on first install
+
+#### Option 1: Azure Key Vault + AzureSignTool (Recommended)
+
+Have the CA deliver the certificate into an Azure Key Vault HSM. Sign packages remotely
+using [AzureSignTool](https://github.com/vcsjones/AzureSignTool) in CI.
+
+**Setup:**
+
+1. Create an Azure Key Vault with HSM-backed keys
+2. Import or have the CA deliver the certificate to the vault
+3. Create a service principal (app registration) with `Key Vault Crypto User` and
+   `Key Vault Certificate User` roles on the vault
+4. Add these GitHub repository secrets:
+   - `AZURE_TENANT_ID` — Entra ID tenant
+   - `AZURE_CLIENT_ID` — Service principal app ID
+   - `AZURE_CLIENT_SECRET` — Service principal secret
+   - `AZURE_KEY_VAULT_URI` — Vault URI (e.g. `https://myvault.vault.azure.net`)
+   - `AZURE_KEY_VAULT_CERT_NAME` — Certificate name in the vault
+
+**CI workflow signing step** (replaces the self-signed cert steps):
+
+```yaml
+- name: Install AzureSignTool
+  run: dotnet tool install --global AzureSignTool
+
+- name: Sign MSIX package
+  shell: pwsh
+  run: |
+    $msix = Get-ChildItem -Path AppPackages -Filter *.msix -Recurse | Select-Object -First 1
+    AzureSignTool sign `
+      --azure-key-vault-url "${{ secrets.AZURE_KEY_VAULT_URI }}" `
+      --azure-key-vault-client-id "${{ secrets.AZURE_CLIENT_ID }}" `
+      --azure-key-vault-client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" `
+      --azure-key-vault-tenant-id "${{ secrets.AZURE_TENANT_ID }}" `
+      --azure-key-vault-certificate "${{ secrets.AZURE_KEY_VAULT_CERT_NAME }}" `
+      --timestamp-rfc3161 http://timestamp.digicert.com `
+      --verbose `
+      $msix.FullName
+```
+
+> **Important:** Update `Publisher` in `Package.appxmanifest` to match the certificate's
+> subject (e.g. `CN=Your Name, O=Your Org, L=City, S=State, C=US`).
+
+#### Option 2: CA-Provided Cloud HSM
+
+Some CAs offer their own cloud HSM services that integrate with CI:
+
+- **DigiCert KeyLocker** — provides a signing client and API keys for CI
+- **Sectigo KeyStorage** — similar cloud HSM with CLI-based signing
+
+These avoid the need for Azure infrastructure but add a vendor-specific dependency.
+Refer to the CA's documentation for GitHub Actions integration steps.
 
 ## CI/CD Pipeline
 
