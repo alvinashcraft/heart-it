@@ -58,8 +58,8 @@ jobs:
         run: |
           $manifest = 'HeartIt.Package/Package.appxmanifest'
           $content = Get-Content $manifest -Raw
-          $content = $content -replace 'Version="[^"]*"', 'Version="${{ steps.version.outputs.VERSION }}"'
-          Set-Content $manifest $content
+          $content = $content -replace '(?<=<Identity[^>]*)\bVersion="[^"]*"', 'Version="${{ steps.version.outputs.VERSION }}"'
+          Set-Content $manifest -Value $content -NoNewline
 
       - name: Generate development certificate
         id: cert
