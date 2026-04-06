@@ -17,6 +17,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    environment: signing
 
     strategy:
       matrix:
