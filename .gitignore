@@ -322,3 +322,6 @@ FodyWeavers.xsd
 
 # WAP project cache
 *.assets.cache
+
+# Winget manifests (submitted to microsoft/winget-pkgs separately)
+manifests/
