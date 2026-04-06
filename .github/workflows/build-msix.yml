@@ -83,8 +83,8 @@ jobs:
         uses: azure/trusted-signing-action@v1
         with:
           endpoint: https://eus.codesigning.azure.net/
-          signing-account-name: alvin-ashcraft-signing
-          certificate-profile-name: alvinashcraft-public-cert
+          signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           files-folder: ${{ github.workspace }}\AppPackages
           files-folder-filter: msix
           files-folder-recurse: true
