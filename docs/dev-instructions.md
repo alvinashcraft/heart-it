@@ -103,7 +103,101 @@ For winget distribution, you need a code signing certificate from a trusted CA.
 Since 2023, all OV/EV code signing certificates require hardware-backed private key storage (HSM).
 This means you can't just download a `.pfx` and use it in CI — you need a cloud HSM solution.
 
-#### Recommended Providers
+- **OV (Organization Validation)** is sufficient for winget distribution, but new apps
+  may trigger SmartScreen "Windows protected your PC" warnings until the app builds
+  download reputation over time
+- **EV (Extended Validation)** costs more but establishes immediate SmartScreen trust —
+  users won't see the "Windows protected your PC" warning on first install
+
+#### Option 1: Azure Trusted Signing (Recommended)
+
+[Azure Trusted Signing](https://learn.microsoft.com/azure/trusted-signing/overview) is a fully managed
+Microsoft signing service. It handles certificate lifecycle, HSM storage, and timestamping — no need
+to purchase or manage certificates yourself. Certificates chain to the Microsoft Identity Verification
+root CA, which is trusted by Windows.
+
+**Pricing:** Basic tier (~$9.99/mo) includes 5,000 signatures/month — more than enough for CI.
+
+**Setup:**
+
+1. **Register the resource provider** — In your Azure subscription, go to **Settings > Resource providers**
+   and register `Microsoft.CodeSigning`
+
+2. **Create a Trusted Signing account** — In the Azure portal, search for "Trusted Signing Accounts"
+   and create one in a [supported region](https://learn.microsoft.com/azure/trusted-signing/quickstart)
+
+3. **Complete identity validation** — Create an identity validation request (Public Trust, Organization
+   or Individual). This requires business details and takes 1–15 business days to process
+
+4. **Create a certificate profile** — Once identity validation is complete, create a "Public Trust"
+   certificate profile linked to your validated identity
+
+5. **Create a service principal for CI** — This is the identity your GitHub Actions workflow uses
+   to authenticate with Azure and sign packages:
+
+   a. In the Azure portal, go to **Entra ID > App registrations > New registration**
+   b. Name it something like `heartit-signing`, leave defaults, and click **Register**
+   c. Note the **Application (client) ID** and your **Directory (tenant) ID** from the overview page
+   d. Go to **Certificates & secrets > Client secrets > New client secret**, add one, and copy the value
+
+   For OIDC (recommended — no secret to rotate):
+
+   a. Instead of a client secret, go to **Certificates & secrets > Federated credentials > Add credential**
+   b. Select **GitHub Actions deploying Azure resources**
+   c. Fill in your org (`alvinashcraft`), repo (`heart-it`), entity type **Tag**, and tag pattern `v*`
+   d. This lets the workflow authenticate without storing a secret
+
+6. **Assign roles** — On your Trusted Signing account in the Azure portal:
+
+   a. Go to **Access control (IAM) > Add role assignment**
+   b. Search for `Artifact Signing Certificate Profile Signer`
+   c. On the **Members** tab, select **User, group, or service principal**
+   d. Click **Select members**, search for your app registration name (e.g. `heartit-signing`), and select it
+   e. Review and assign
+
+7. **Configure GitHub secrets:**
+   - `AZURE_TENANT_ID` — Directory (tenant) ID from the app registration
+   - `AZURE_CLIENT_ID` — Application (client) ID from the app registration
+   - `AZURE_CLIENT_SECRET` — Client secret value (skip if using OIDC)
+   - `AZURE_SUBSCRIPTION_ID` — Azure subscription ID
+
+8. **Update `Package.appxmanifest`** — Set `Publisher` to match the certificate subject from your
+   identity validation (visible in the certificate profile details)
+
+**CI workflow signing step** (replaces the self-signed cert steps):
+
+```yaml
+- name: Azure login
+  uses: azure/login@v1
+  with:
+    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: Sign MSIX with Trusted Signing
+  uses: azure/trusted-signing-action@v1
+  with:
+    endpoint: https://eus.codesigning.azure.net/
+    signing-account-name: <your-account-name>
+    certificate-profile-name: <your-profile-name>
+    files-folder: ${{ github.workspace }}\AppPackages
+    files-folder-filter: msix
+    file-digest: SHA256
+    timestamp-rfc3161: http://timestamp.acs.microsoft.com
+    timestamp-digest: SHA256
+```
+
+> For OIDC (recommended), configure federated credentials on the app registration and add
+> `permissions: id-token: write` to the workflow job. See the
+> [action docs](https://github.com/Azure/trusted-signing-action/blob/main/docs/OIDC.md).
+
+#### Option 2: Azure Key Vault + AzureSignTool
+
+If you already have a certificate from a third-party CA (SSL.com, Sectigo, DigiCert, etc.),
+have the CA deliver it into an Azure Key Vault HSM and sign remotely using
+[AzureSignTool](https://github.com/vcsjones/AzureSignTool) in CI.
+
+**Recommended CA providers:**
 
 | Provider | OV (~$/yr) | Notes |
 |----------|-----------|-------|
@@ -111,17 +205,6 @@ This means you can't just download a `.pfx` and use it in CI — you need a clou
 | FastSSL | ~$129 | Cheapest option |
 | Sectigo/Comodo | ~$166–226 | Most widely used, offers KeyStorage cloud HSM |
 | DigiCert | ~$434+ | Premium, offers KeyLocker cloud HSM |
-
-- **OV (Organization Validation)** is sufficient for winget distribution, but new apps
-  may trigger SmartScreen "Windows protected your PC" warnings until the app builds
-  download reputation over time
-- **EV (Extended Validation)** costs more but establishes immediate SmartScreen trust —
-  users won't see the "Windows protected your PC" warning on first install
-
-#### Option 1: Azure Key Vault + AzureSignTool (Recommended)
-
-Have the CA deliver the certificate into an Azure Key Vault HSM. Sign packages remotely
-using [AzureSignTool](https://github.com/vcsjones/AzureSignTool) in CI.
 
 **Setup:**
 
@@ -160,7 +243,7 @@ using [AzureSignTool](https://github.com/vcsjones/AzureSignTool) in CI.
 > **Important:** Update `Publisher` in `Package.appxmanifest` to match the certificate's
 > subject (e.g. `CN=Your Name, O=Your Org, L=City, S=State, C=US`).
 
-#### Option 2: CA-Provided Cloud HSM
+#### Option 3: CA-Provided Cloud HSM
 
 Some CAs offer their own cloud HSM services that integrate with CI:
 

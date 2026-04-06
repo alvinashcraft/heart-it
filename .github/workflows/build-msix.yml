@@ -11,6 +11,7 @@ on:
         required: false
 
 permissions:
+  id-token: write
   contents: write
 
 jobs:
@@ -36,9 +37,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup winapp CLI
-        uses: microsoft/setup-WinAppCli@v0.1
-
       - name: Determine version
         id: version
         shell: pwsh
@@ -61,26 +59,37 @@ jobs:
           $content = $content -replace '(?<=<Identity[^>]*)\bVersion="[^"]*"', 'Version="${{ steps.version.outputs.VERSION }}"'
           Set-Content $manifest -Value $content -NoNewline
 
-      - name: Generate development certificate
-        id: cert
-        shell: pwsh
-        run: |
-          winapp cert generate --publisher "CN=HeartIt" --output HeartIt_DevCert.pfx --password HeartItBuild
-          Move-Item HeartIt_DevCert.pfx HeartIt.Package\HeartIt_DevCert.pfx
-
       - name: Build MSIX package
         run: >
           msbuild ${{ env.PACKAGE_PROJECT }}
           /p:Configuration=Release
           /p:Platform=${{ matrix.platform }}
           /p:UapAppxPackageBuildMode=SideloadOnly
-          /p:AppxPackageSigningEnabled=true
-          /p:PackageCertificateKeyFile=HeartIt_DevCert.pfx
-          /p:PackageCertificatePassword=HeartItBuild
+          /p:AppxPackageSigningEnabled=false
           /p:AppxPackageDir=${{ github.workspace }}\AppPackages\
           /p:GenerateAppxPackageOnBuild=true
           /p:AppxBundle=Never
           /restore
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign MSIX with Trusted Signing
+        uses: azure/trusted-signing-action@v1
+        with:
+          endpoint: https://eus.codesigning.azure.net/
+          signing-account-name: alvin-ashcraft-signing
+          certificate-profile-name: alvinashcraft-public-cert
+          files-folder: ${{ github.workspace }}\AppPackages
+          files-folder-filter: msix
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4

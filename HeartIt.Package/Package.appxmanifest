@@ -8,13 +8,13 @@
 
   <Identity
     Name="HeartIt"
-    Publisher="CN=HeartIt"
+    Publisher="CN=Alvin Ashcraft, O=Alvin Ashcraft, L=West Grove, S=Pennsylvania, C=US"
     Version="1.0.0.0"
     ProcessorArchitecture="neutral" />
 
   <Properties>
     <DisplayName>Heart It</DisplayName>
-    <PublisherDisplayName>Heart It</PublisherDisplayName>
+    <PublisherDisplayName>Alvin Ashcraft</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
     <Description>Quick reactions for Microsoft Teams meetings using global keyboard shortcuts.</Description>
   </Properties>
