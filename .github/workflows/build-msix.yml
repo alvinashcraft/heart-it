@@ -144,7 +144,8 @@ jobs:
           endpoint: https://eus.codesigning.azure.net/
           signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
-          files: HeartIt.msixbundle
+          files-folder: ${{ github.workspace }}
+          files-folder-filter: msixbundle
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
