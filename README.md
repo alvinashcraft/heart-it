@@ -17,21 +17,21 @@ A Windows desktop application that enables quick reactions in Microsoft Teams us
 
 ## Installation
 
-### From winget (coming soon)
+### From winget
 
 ```bash
-winget install HeartIt
+winget install AlvinAshcraft.HeartIt
 ```
 
 ### From GitHub Releases
 
 1. Download the latest `.msixbundle` from [Releases](../../releases)
-2. Double-click to install (you may need to install the signing certificate first for sideloaded packages)
+2. Double-click to install
 
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/heart-it.git
+git clone https://github.com/alvinashcraft/heart-it.git
 cd heart-it
 dotnet build
 dotnet run --project HeartIt/HeartIt.csproj
@@ -85,7 +85,7 @@ HeartIt uses Windows UI Automation to interact with the Microsoft Teams applicat
 
 ## License
 
-[Add your license here]
+This project is licensed under the [MIT License](LICENSE.txt).
 
 ## Contributing
 
