@@ -29,7 +29,9 @@ public partial class App : Application
 
     private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
-        if (e.Category == UserPreferenceCategory.General)
+        if (e.Category is UserPreferenceCategory.General
+            or UserPreferenceCategory.Color
+            or UserPreferenceCategory.VisualStyle)
         {
             Dispatcher.BeginInvoke(new Action(() => ApplyTheme(IsSystemDarkMode())));
         }
