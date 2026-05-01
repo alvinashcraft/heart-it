@@ -14,8 +14,11 @@
         ResizeMode="NoResize"
         ShowInTaskbar="True"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
-    <Border Background="#FF2D2D30" CornerRadius="12" Padding="6,4"
-            BorderBrush="#FF3F3F46" BorderThickness="1">
+    <Border Background="{DynamicResource PanelBackground}" CornerRadius="14" Padding="8,6"
+            BorderBrush="{DynamicResource PanelBorder}" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="12" ShadowDepth="2" Opacity="0.35"/>
+        </Border.Effect>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -34,14 +37,19 @@
             <!-- Reaction buttons -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="BtnLike" Content="👍" Click="OnReactionClick" Tag="Like"
+                        Background="{DynamicResource BadgeLike}"
                         Style="{StaticResource ReactionButton}" ToolTip="Like (Ctrl+Alt+1)"/>
                 <Button x:Name="BtnHeart" Content="❤️" Click="OnReactionClick" Tag="Love"
+                        Background="{DynamicResource BadgeLove}"
                         Style="{StaticResource ReactionButton}" ToolTip="Heart (Ctrl+Alt+2)"/>
                 <Button x:Name="BtnClap" Content="👏" Click="OnReactionClick" Tag="Applause"
+                        Background="{DynamicResource BadgeClap}"
                         Style="{StaticResource ReactionButton}" ToolTip="Applause (Ctrl+Alt+3)"/>
                 <Button x:Name="BtnLaugh" Content="😂" Click="OnReactionClick" Tag="Laugh"
+                        Background="{DynamicResource BadgeLaugh}"
                         Style="{StaticResource ReactionButton}" ToolTip="Laugh (Ctrl+Alt+4)"/>
                 <Button x:Name="BtnSurprised" Content="😮" Click="OnReactionClick" Tag="Surprised"
+                        Background="{DynamicResource BadgeSurprised}"
                         Style="{StaticResource ReactionButton}" ToolTip="Surprised (Ctrl+Alt+5)"/>
             </StackPanel>
 

@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Panel: soft warm gradient (peach -> pink -> lavender) -->
+    <LinearGradientBrush x:Key="PanelBackground" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFFFF4E6" Offset="0.0"/>
+        <GradientStop Color="#FFFCE4EC" Offset="0.5"/>
+        <GradientStop Color="#FFEDE7F6" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="PanelBorder" Color="#FFE1BEE7"/>
+    <SolidColorBrush x:Key="ForegroundText" Color="#FF1F1F1F"/>
+    <SolidColorBrush x:Key="CloseForeground" Color="#FF606060"/>
+
+    <!-- Per-emoji badge backgrounds: bright but soft so dark emoji glyphs read clearly -->
+    <SolidColorBrush x:Key="BadgeLike" Color="#FFBBDEFB"/>
+    <SolidColorBrush x:Key="BadgeLove" Color="#FFF8BBD0"/>
+    <SolidColorBrush x:Key="BadgeClap" Color="#FFFFE082"/>
+    <SolidColorBrush x:Key="BadgeLaugh" Color="#FFC8E6C9"/>
+    <SolidColorBrush x:Key="BadgeSurprised" Color="#FFD1C4E9"/>
+
+    <!-- Hover/pressed overlays (semi-transparent white/black to lighten/darken the badge) -->
+    <SolidColorBrush x:Key="BadgeHoverOverlay" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="BadgePressedOverlay" Color="#30000000"/>
+
+</ResourceDictionary>

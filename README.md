@@ -10,6 +10,7 @@ A Windows desktop application that enables quick reactions in Microsoft Teams us
 - **Multiple Reactions**: Support for Like, Love, Applause, Laugh, and Surprised reactions
 - **System Tray Integration**: Runs quietly in the background with easy access from the system tray
 - **Automatic Teams Detection**: Automatically finds and interacts with your Microsoft Teams window
+- **Light & Dark Theme**: Automatically follows your Windows theme with a colorful, fun look in both modes — and updates live when you change the system theme
 
 ## Requirements
 
@@ -67,6 +68,15 @@ Once the application is running, use the following keyboard shortcuts while in a
 - **Ctrl+Alt+5**: Surprised 😮
 
 The application runs in the system tray. Right-click the tray icon to exit.
+
+## Theming
+
+HeartIt automatically detects your Windows light/dark mode setting and applies a matching theme to the toolbar. Each reaction button has its own colored badge so the emoji glyphs stay readable on either background. If you switch your Windows theme while the app is running, the toolbar updates immediately — no restart required.
+
+Theming is built on:
+
+- The WPF Fluent theme (`ThemeMode="System"`) introduced in .NET 9, which styles built-in chrome and controls.
+- A pair of custom resource dictionaries (`HeartIt/Themes/Light.xaml` and `HeartIt/Themes/Dark.xaml`) that supply the panel gradient, border, text, and per-emoji badge colors. `App.xaml.cs` listens for `SystemEvents.UserPreferenceChanged` and swaps the active dictionary when the OS theme changes.
 
 ## How It Works
 

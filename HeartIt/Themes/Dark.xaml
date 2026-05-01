@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Panel: deep night gradient (navy -> aubergine -> indigo) -->
+    <LinearGradientBrush x:Key="PanelBackground" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FF1B1B2F" Offset="0.0"/>
+        <GradientStop Color="#FF2D1B45" Offset="0.5"/>
+        <GradientStop Color="#FF162447" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="PanelBorder" Color="#FF4A3A6B"/>
+    <SolidColorBrush x:Key="ForegroundText" Color="#FFF5F5F5"/>
+    <SolidColorBrush x:Key="CloseForeground" Color="#FFB0B0B0"/>
+
+    <!-- Per-emoji badges: saturated mid-tones bright enough to keep dark emoji glyphs visible -->
+    <SolidColorBrush x:Key="BadgeLike" Color="#FF64B5F6"/>
+    <SolidColorBrush x:Key="BadgeLove" Color="#FFEC407A"/>
+    <SolidColorBrush x:Key="BadgeClap" Color="#FFFFB300"/>
+    <SolidColorBrush x:Key="BadgeLaugh" Color="#FF66BB6A"/>
+    <SolidColorBrush x:Key="BadgeSurprised" Color="#FF9575CD"/>
+
+    <SolidColorBrush x:Key="BadgeHoverOverlay" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="BadgePressedOverlay" Color="#40000000"/>
+
+</ResourceDictionary>
