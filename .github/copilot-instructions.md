@@ -10,6 +10,7 @@ HeartIt is a WPF desktop app (.NET 10) that sends reactions in Microsoft Teams m
 - **Single service class** — `TeamsReactionService` handles all Teams interaction (process detection, UI Automation traversal, coordinate-based clicking).
 - **Win32 interop throughout** — P/Invoke for `RegisterHotKey`, `SetForegroundWindow`, `SetCursorPos`, `mouse_event`, `keybd_event`. HwndSource message hook for `WM_HOTKEY`.
 - **Packaging project** — `HeartIt.Package` is a `.wapproj` (Windows Application Packaging Project) that produces MSIX. It requires MSBuild, not `dotnet build`.
+- **Theming** — uses WPF Fluent (`ThemeMode="System"` in `App.xaml`) plus a pair of custom resource dictionaries in `HeartIt/Themes/` (`Light.xaml` and `Dark.xaml`). `App.xaml.cs` listens to `SystemEvents.UserPreferenceChanged` and swaps the active dictionary on system theme changes. All custom brushes are referenced via `DynamicResource` so they re-resolve at runtime.
 
 ## Code Style
 

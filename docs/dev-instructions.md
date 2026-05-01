@@ -15,7 +15,11 @@ HeartIt.slnx
 ├── HeartIt/                    # WPF application (.NET 10)
 │   ├── HeartIt.csproj
 │   ├── MainWindow.xaml         # Reaction toolbar UI
-│   ├── App.xaml                # Application entry point and styles
+│   ├── App.xaml                # Application entry point, Fluent theme, styles
+│   ├── App.xaml.cs             # Detects Windows light/dark mode and swaps theme dictionary at runtime
+│   ├── Themes/
+│   │   ├── Light.xaml          # Light-mode brushes (panel, badges, text)
+│   │   └── Dark.xaml           # Dark-mode brushes
 │   └── Services/
 │       └── TeamsReactionService.cs  # UI Automation logic for Teams
 └── HeartIt.Package/            # Windows Application Packaging Project
