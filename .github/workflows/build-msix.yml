@@ -162,3 +162,29 @@ jobs:
         with:
           files: HeartIt.msixbundle
           generate_release_notes: true
+
+  winget:
+    runs-on: windows-latest
+    needs: bundle
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Submit manifest update to winget-pkgs
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $bundleUrl = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/HeartIt.msixbundle"
+          $releaseNotesUrl = "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+
+          Write-Host "Submitting AlvinAshcraft.HeartIt $version with installer URL $bundleUrl"
+
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+
+          .\wingetcreate.exe update AlvinAshcraft.HeartIt `
+            --version $version `
+            --urls $bundleUrl `
+            --release-notes-url $releaseNotesUrl `
+            --submit `
+            --token $env:WINGET_TOKEN
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_SECRET }}
