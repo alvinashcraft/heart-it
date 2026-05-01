@@ -2,6 +2,8 @@
 
 A Windows desktop application that enables quick reactions in Microsoft Teams using global keyboard shortcuts.
 
+![HeartIt icon](HeartIt/Images/heartit.icon.png)
+
 ## Features
 
 - **Global Hotkeys**: Send Teams reactions from anywhere on your system without switching windows
